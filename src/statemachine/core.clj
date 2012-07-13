@@ -36,5 +36,14 @@
 (defmacro defstatemachine [name & forms]
   (let [state-names (map first forms)]
     `(do
-       (declare-all ~@state-names)))
-  `(defn))
+       (declare-all ~@state-names)
+       ~@(map (fn [[name metadata & rest]]
+                `(deftransition ~name ~metadata ~@rest))
+              forms))))
+
+(defn process
+  ([initial-state coll]
+     (process initial-state coll identity))
+  ([initial-state coll transform]
+     (let [s (seq coll)]
+       (loop [processed [], remainder s]))))

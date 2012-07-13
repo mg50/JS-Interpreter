@@ -76,4 +76,37 @@
       (is (not (bound? v))))))
 
 
-;(testing "defstatemachine")
+(defstatemachine st
+  (one {}
+       "hello" two
+       "goodbye" three
+       #"asdf" one)
+  (two {}
+       coll? one
+       three)
+  (three {}
+         30 one
+         one))
+
+(testing "defstatemachine"
+  (testing "state one"
+    (deftest one-1
+      (is (= (one "hello") two)))
+    (deftest one-2
+      (is (= (one "goodbye") three)))
+    (deftest one-3
+      (is (= (one "basdf") one))))
+  (testing "state two"
+    (deftest two-1
+      (is (= (two []) one)))
+    (deftest two-2
+      (is (= (two '(4 3 2)) one)))
+    (deftest two-3
+      (is (= (two 30) one))))
+  (testing "state three"
+    (deftest three-1
+      (is (= (three 30) one)))
+    (deftest three-2
+      (is (= (three "hello") two)))
+    (deftest three-3
+      (is (= (three "goodbye") three)))))
