@@ -24,7 +24,11 @@
     (deftest regex-2
       (is (transition-matches? "fgggd" #"(a|g){3}d$")))
     (deftest regex-3
-      (is (not (transition-matches? "fgggda" #"(a|g){3}d$")))))
+      (is (not (transition-matches? "fgggda" #"(a|g){3}d$"))))
+    (deftest regex-4
+      (is (transition-matches? \b #"a|b")))
+    (deftest regex-5
+      (is (transition-matches? 4 #"\d"))))
 
   (testing "default"
     (deftest default-1
@@ -76,7 +80,7 @@
       (is (not (bound? v))))))
 
 
-(defstatemachine st
+(defstatemachine st1
   (one {}
        "hello" two
        "goodbye" three
@@ -89,6 +93,8 @@
          one))
 
 (testing "defstatemachine"
+  (is (= st1 one))
+
   (testing "state one"
     (deftest one-1
       (is (= (one "hello") two)))
@@ -110,3 +116,17 @@
       (is (= (three "hello") two)))
     (deftest three-3
       (is (= (three "goodbye") three)))))
+
+
+(defstatemachine st2
+  (odd {:bit "1"}
+       #"[02468]" even
+       #"[13579]" odd)
+  (even {:bit "0"}
+        odd))
+(testing "process"
+  (let [transform #(:bit (meta %))]
+    (deftest process-1
+      (is (= "01101" (apply str (process st2
+                                         "63529"
+                                         transform)))))))

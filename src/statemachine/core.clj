@@ -10,7 +10,7 @@
 (defmethod transition-matches? :function [val matcher]
   (matcher val))
 (defmethod transition-matches? :regex [val matcher]
-  (re-find matcher val))
+  (re-find matcher (str val)))
 (defmethod transition-matches? :default [val matcher]
   (= val matcher))
 
@@ -39,11 +39,20 @@
        (declare-all ~@state-names)
        ~@(map (fn [[name metadata & rest]]
                 `(deftransition ~name ~metadata ~@rest))
-              forms))))
+              forms)
+              (def ~name ~(ffirst forms)))))
 
 (defn process
   ([initial-state coll]
      (process initial-state coll identity))
   ([initial-state coll transform]
      (let [s (seq coll)]
-       (loop [processed [], remainder s]))))
+       (loop [state initial-state
+              processed []
+              remainder s]
+         (if remainder
+           (let [new-state (state (first remainder))]
+             (recur new-state
+                    (conj processed (transform new-state))
+                    (next remainder)))
+           processed)))))
